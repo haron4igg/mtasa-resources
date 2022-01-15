@@ -10,6 +10,8 @@ local fileTypes = { "script","map","file","config","html" }
 local specialFileTypes = { "script","file","config","html" }
 local DESTROYED_ELEMENT_DIMENSION = getWorkingDimension() + 1
 
+local previousElementsCount = 0
+
 ---
 local openResourceCoroutine
 local openingResource
@@ -116,6 +118,7 @@ addEventHandler("newResource", root,
 		triggerClientEvent ( source, "saveloadtest_return", source, "new", true )
 		triggerEvent("onNewMap", resourceRoot)
 		dumpSave()
+		resetIDCache()
 		editor_gui.outputMessage(getPlayerName(client).." started a new map.", root, 255, 0, 0)
 	end
 )
@@ -128,6 +131,7 @@ function handleOpenResource()
 		destroyElement ( openingMapElement )
 		loadedMap = openingResourceName
 		passNewMapSettings()
+		resetIDCache()
 		if ( not openingOnStart ) then
 			local playerName = "No longer connected player"
 			if (isElement(openingSource)) then
@@ -241,8 +245,9 @@ function openResource( resourceName, onStart )
 			local mapElement = loadMapData ( mapNode, mapContainer, false )
 			openingMapElement = mapElement
 			-- Map may take a while to load so show loading bar
-			if (#getElementChildren(mapElement) > 500) then
-				triggerClientEvent(root, "saveLoadProgressBar", root, 0, #getElementChildren(mapElement))
+			previousElementsCount = #getElementChildren(mapElement)
+			if (previousElementsCount > 500) then
+				triggerClientEvent(root, "saveLoadProgressBar", root, 0, previousElementsCount)
 			end
 			for _, element in ipairs ( getElementChildren ( mapElement, "removeWorldObject" ) ) do
 				local model = getElementData ( element, "model" )
@@ -525,15 +530,19 @@ function doQuickSaveCoroutineFunction(saveAs, dump, client)
 		local resource = getResourceFromName ( dump and DUMP_RESOURCE or loadedMap )
 		local mapTable = getResourceFiles ( resource, "map" )
 		if ( not mapTable ) then
-			triggerClientEvent ( client, "saveloadtest_return", client, "save", false, loadedMap,
-			"Could not overwrite resource, "..resourceName.." may be corrupt, consider deleting the resource." )
+			if isElement(client) then
+				triggerClientEvent ( client, "saveloadtest_return", client, "save", false, loadedMap,
+				"Could not overwrite resource, "..resourceName.." may be corrupt, consider deleting the resource." )
+			end
 			quickSaveCoroutine = nil
 			return false
 		end
 		for key, mapPath in ipairs(mapTable) do
 			if ( not removeResourceFile ( resource, mapPath, "map" ) ) then
-				triggerClientEvent ( client, "saveloadtest_return", client, "save", false, loadedMap,
-				"Could not overwrite resource. The "..resourceName.." may be in .zip format." )
+				if isElement(client) then
+					triggerClientEvent ( client, "saveloadtest_return", client, "save", false, loadedMap,
+					"Could not overwrite resource. The "..resourceName.." may be in .zip format." )
+				end
 				quickSaveCoroutine = nil
 				return false
 			end
@@ -541,7 +550,9 @@ function doQuickSaveCoroutineFunction(saveAs, dump, client)
 		clearResourceMeta ( resource, true )
 		local xmlNode = addResourceMap ( resource, loadedMap..".map" )
 		if ( not xmlNode ) then
-			triggerClientEvent ( client, "saveloadtest_return", client, "quickSave", false, loadedMap )
+			if isElement(client) then
+				triggerClientEvent ( client, "saveloadtest_return", client, "quickSave", false, loadedMap )
+			end
 			quickSaveCoroutine = nil
 			return false
 		end
@@ -596,6 +607,8 @@ function doQuickSaveCoroutineFunction(saveAs, dump, client)
 			usedDefinitions = string.sub(usedDefinitions, 1, #usedDefinitions - 1)
 			xmlNodeSetAttribute(xmlNode, "edf:definitions", usedDefinitions)
 		end
+		local collectionNew = #rootElements
+
 		for i, element in ipairs(rootElements) do
 			if (getTickCount() > tick + 200) or ( DEBUG_LOADSAVE and i < 40 ) then
 				setTimer(function()
@@ -613,8 +626,15 @@ function doQuickSaveCoroutineFunction(saveAs, dump, client)
 				tick = getTickCount()
 			end
 			local elementNode = createElementAttributesForSaving(xmlNode, element)
-			dumpNodes ( elementNode, elementChildren[element], elementChildren )
+			collectionNew = collectionNew + dumpNodes ( elementNode, elementChildren[element], elementChildren )
 		end
+
+		local changes = math.abs(collectionNew - previousElementsCount)
+		if not dump or changes > 0 then
+			outputDebugString( "[TRACK] Saved changes: " .. changes )
+		end
+		previousElementsCount = collectionNew
+
 		xmlSaveFile(xmlNode)
 		xmlUnloadFile(xmlNode)
 		local metaNode = xmlLoadFile ( ':' .. getResourceName(resource) .. '/' .. "meta.xml" )
@@ -625,16 +645,18 @@ function doQuickSaveCoroutineFunction(saveAs, dump, client)
 			quickSaveCoroutine = nil
 			return
 		end
-		if ( saveAs ) then
+		if ( saveAs and isElement(client) ) then
 			triggerClientEvent ( client, "saveloadtest_return", client, "save", true )
 		end
 		if ( not dump ) then
-			editor_gui.outputMessage (getPlayerName(client).." saved the map.", root,255,0,0)
 			dumpSave()
+			if isElement(client) then
+				editor_gui.outputMessage (getPlayerName(client).." saved the map.", root,255,0,0)
+			end
 		end
 	else
 		-- No map is loaded, if not caused by auto save, ask the client to save as
-		if (client) then
+		if isElement(client) then
 			editor_gui.loadsave_getResources("saveAs", client)
 		end
 	end

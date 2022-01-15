@@ -6,7 +6,7 @@ local screenX,screenY = guiGetScreenSize()
 local catNodes
 local cachedElements = {}
 local path = "client/browser/"
-local xmlFiles = { ["objectID"] = getResourceConfig(path.."objects.xml"), ["skinID"] = getResourceConfig(path.."skins.xml"), ["vehicleID"] = getResourceConfig(path.."vehicles.xml"), ["favourite"] = (xmlLoadFile("client/browser/favourites.xml") or xmlCreateFile("client/browser/favourites.xml", "favourite")) }
+local xmlFiles = false
 local elementCatalogs = { ["objectID"]="object",["vehicleID"]="vehicle",["skinID"]="skin" }
 local searchMax
 local isScrolling
@@ -83,7 +83,29 @@ function browser.initiate ( theType, initialCat, initialModel )
 	guiSetInputEnabled ( false )
 end
 
+addEvent("onEditorWillPreloadBrowser")
+local browserStarted = false
 function startBrowser ( elementType, callback, initialCat, initialModel, rememberLast )
+
+	if not browserStarted then
+		TIME = getTickCount()
+
+		if not xmlFiles then
+			triggerEvent( "onEditorWillPreloadBrowser", localPlayer)
+
+			xmlFiles = {
+				["objectID"] = xmlLoadFile(path.."objects.xml"),
+				["skinID"] = xmlLoadFile(path.."skins.xml"),
+				["vehicleID"] = xmlLoadFile(path.."vehicles.xml"),
+				["favourite"] = (xmlLoadFile("client/browser/favourites.xml") or xmlCreateFile("client/browser/favourites.xml", "favourite"))
+			}
+		end
+
+		browserStarted = true
+		createBrowser()
+		outputConsole("createBrowser() : "..tostring(getTickCount()-TIME));
+	end
+
 	if not xmlFiles[elementType] then return false end
 	if not callback then return false end
 	if not cachedElements[elementType] then
@@ -224,7 +246,18 @@ end
 function createCategoriesTable ( node, nodeid )
 	if nodeid == nil then nodeid = 1 end
 	--outputDebugString ( "dReached 1", 3 )
+
+	local sorted = {}
 	for k,value in pairs(node) do
+		table.insert(sorted, {k,value})
+	end
+
+	table.sort(sorted, function (a,b)
+		return a[1] < b[1]
+	end)
+
+	for i,info in ipairs(sorted) do
+		local k, value = unpack(info)
 		--if nodeid == 0 then --outputDebugString ( "dReached 2", 3 ) end
 		if ( type(k) == "string" ) then --if its a category
 			--do stuff

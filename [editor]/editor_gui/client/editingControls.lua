@@ -118,7 +118,7 @@ eC.string = {
 	},
 	constructor = function( self, info )
 		self.GUI.editField = guiCreateEdit( info.x, info.y, info.width, info.height, tostring(info.value), info.relative, info.parent )
-
+		guiEditSetReadOnly(self.GUI.editField, info.readonly == "true")
 		self:addHandler( "onClientGUIChanged", self.GUI.editField, self.callChangeHandlers )
 
 		return self
@@ -2060,4 +2060,3 @@ function guiElementGetScreenPosition(element)
 	y = y + 7 --Account for the mouse's height
 	return x,y
 end
-

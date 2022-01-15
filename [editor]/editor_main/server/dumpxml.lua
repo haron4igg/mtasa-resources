@@ -69,10 +69,12 @@ function dumpMap ( xml, save, baseElement )
 end
 
 function dumpNodes ( xmlNode, elementTable, elementChildren )
+	local children = 0
 	for i, element in ipairs(elementTable) do
 		local elementNode = createElementAttributesForSaving(xmlNode, element)
-		dumpNodes ( elementNode, elementChildren[element], elementChildren )
+		children = children + dumpNodes ( elementNode, elementChildren[element], elementChildren )
 	end
+	return children + #elementTable
 end
 
 function dumpMeta ( xml, extraNodes, resource, filename, test )

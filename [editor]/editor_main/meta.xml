@@ -143,6 +143,7 @@
 	<file src="client/images/icons/pickup.png" />
 	<file src="client/images/icons/ped.png" />
 	<file src="client/images/icons/wor.png" />
+	<file src="client/images/icons/water.png"/>
 	
 	<file src="client/colpatch/patches.col" />
 	<file src="client/colpatch/placement.list" />

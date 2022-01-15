@@ -35,6 +35,12 @@ local nameFromCategoryID = {
 	end,
 }
 
+local lIDsCache = {}
+
+function resetIDCache()
+	lIDsCache = {}
+end
+
 -- assigns a new unique ID to an element
 function assignID ( theElement )
 	local creatorResource = edf.edfGetCreatorResource(theElement)
@@ -66,9 +72,13 @@ function assignID ( theElement )
 		end
 
 		-- and lastly, find an unused index, and set the ID
-		local i = 1
+		local template = idString .. " (%d)"
+
+		local cacheInfo = lIDsCache[template] or {index=1}
+
+		local i = cacheInfo.index
 		while true do
-			local newID = idString .. " ("..i..")"
+			local newID = template:format(i)
 			if getElementByID ( newID ) == false then
 				setElementID( theElement, newID )
 				setElementData( theElement, "id", newID )
@@ -79,5 +89,6 @@ function assignID ( theElement )
 				i = i + 1
 			end
 		end
+		lIDsCache[template] = {index=i}
 	end
 end

@@ -598,6 +598,7 @@ local function addEDFPropertyControlsForElement( element )
 			applier, --property local applier function
 			{value = initialValue,
 			 validvalues = dataDefinition.validvalues,
+			 readonly = dataDefinition.readonly,
 			 datafield = dataField } --parameters table
 		)
 	end --for
@@ -618,7 +619,11 @@ local function addEDFPropertyControlsForType( elementType, resourceName )
 			dataDefinition.friendlyname or dataField,
 			dataDefinition.description,
 			nil,
-			{ validvalues = dataDefinition.validvalues, datafield = dataField }
+			{
+				validvalues = dataDefinition.validvalues,
+				readonly = dataDefinition.readonly,
+				datafield = dataField
+			}
 		)
 	end
 end
@@ -765,7 +770,7 @@ function openPropertiesBox( element, resourceName, shortcut )
 	if isPropertiesOpen then
 		return false
 	end
-	
+
 	selectedElement = nil
 	--Tutorial hook
 	if tutorialVars.detectPropertiesBox then
@@ -1035,4 +1040,3 @@ function pulloutAction.Delete()
 	toggleProperties()
 	move_keyboard.disable()
 end
-

@@ -623,8 +623,8 @@ function edfCreateElement(elementType, creatorClient, fromResource, parametersTa
 			elseif dataField == "rotation" then
 				edfSetElementRotation(newElement, dataValue[1], dataValue[2], dataValue[3])
 			elseif dataField == "interior" then
-				setElementInterior(newElement, dataValue)
-				setElementData(newElement, dataField, dataValue)
+				setElementInterior(newElement, math.max(dataValue, 0))
+				setElementData(newElement, dataField, math.max(dataValue, 0))
 			elseif dataField == "dimension" then
 				setElementDimension(newElement, dataValue)
 			elseif dataField == "alpha" then
@@ -667,8 +667,8 @@ function edfCloneElement(theElement, editorMode )
 	end
 
 	parametersTable = {}
-	parametersTable.position = {edfGetElementPosition(theElement)} or {0,0,0}
-	parametersTable.rotation = {edfGetElementRotation(theElement)} or {0,0,0}
+	parametersTable.position = {edfGetElementPosition(theElement)}
+	parametersTable.rotation = {edfGetElementRotation(theElement)}
 	parametersTable.interior = edfGetElementInterior(theElement) or 0
 	parametersTable.dimension = edfGetElementDimension(theElement) or 0
 	parametersTable.alpha = edfGetElementAlpha(theElement) or 255
@@ -873,7 +873,7 @@ function edfGetElementRotation(element)
 	if rx and ry and rz then
 		return rx, ry, rz
 	else
-		return false
+		return 0,0,0
 	end
 end
 
@@ -1422,4 +1422,3 @@ function edfGetResourceForElementType(elementType)
 
 	return res
 end
-

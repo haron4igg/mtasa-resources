@@ -61,7 +61,7 @@ local defaultControls = {
 {	name="browser_confirm",			key ="enter",			friendlyName="Model Browser Confirm"			},
 {	name="browser_zoom_in",			key ="mouse_wheel_up",	friendlyName="Model Browser Zoom In"			},
 {	name="browser_zoom_out",		key ="mouse_wheel_down",friendlyName="Model Browser Zoom Out"			},
-{	name="toggle_test",				key ="F5",				friendlyName="Toggle test mode"					},
+{	name="toggle_test",				key ="F9",				friendlyName="Toggle test mode"					},
 {	name="toggle_basictest",		key ="F6",				friendlyName="Toggle basic test mode"			},
 {	name="lock_selected_element",		key ="l",				friendlyName="Lock/Unlock Selected Element"			},
 -- {	name="clipboard_copy"			key ="c",		},
