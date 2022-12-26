@@ -102,7 +102,7 @@ function setCurrentResource ( resourceName )
     frames['content'].location ="/" + currentResourceName + "/";
 }
 
-function setCurrentPage ( resourceName, pageName )
+function setCurrentPage ( resourceName, pageName, query )
 {
 
 	deselectMenuItem();
@@ -115,7 +115,7 @@ function setCurrentPage ( resourceName, pageName )
         current.className='active_subpage';
     }
 
-    frames['content'].location ="/" + currentResourceName + "/" + pageName;
+    frames['content'].location ="/" + currentResourceName + "/" + pageName + (query ? "#" + encodeURI(query) : "");
 }
 
 function deselectMenuItem()
