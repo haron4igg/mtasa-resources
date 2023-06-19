@@ -33,9 +33,9 @@ function createMapTab()
 	addEventHandler ("onClientGUIChanged", aAdminForm, guiChanged)
 end
 
-function loadMaps(gamemodeMapTable, gamemode, map)
+function loadMaps(gamemodeMapTable, gamemode1, map)
 	guiSetText(aTabMap.CurMap,"Current Map: ".. tostring ( map or "N/A" ) )
-	guiSetText(aTabMap.CurGamemode,"Current Gamemode: ".. tostring ( gamemode or "N/A" ) );
+	guiSetText(aTabMap.CurGamemode,"Current Gamemode: ".. tostring ( gamemode1 or "N/A" ) );
 	if gamemodeMapTable then
 		aGamemodeMapTable = gamemodeMapTable
 		for id,gamemode in pairs (gamemodeMapTable) do
@@ -66,7 +66,7 @@ function guiClick(button)
 				guiGridListClear(aTabMap.MapList)
 				triggerServerEvent("getMaps_s", localPlayer, true)
 			end
-			if not guiGridListGetSelectedItem ( aTabMap.MapList ) == -1 then
+			if ( source ~= aTabMap.MapListSearch ) and guiGridListGetSelectedItem ( aTabMap.MapList ) == -1 then
 				aMessageBox ( "error", "No map selected!" )
 			end
 			local mapName = guiGridListGetItemText ( aTabMap.MapList, guiGridListGetSelectedItem( aTabMap.MapList ), 1 )

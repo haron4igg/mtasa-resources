@@ -14,7 +14,6 @@ local ignoreElementWalls = true -- 'false' not supported yet
 local isEnabled = false
 
 local camX, camY, camZ
-local camRX, camRY, camRZ
 
 local selectedElement
 local centerToBaseDistance
@@ -23,8 +22,7 @@ local rotationless
 local rotX, rotY, rotZ
 
 local collisionless
-local minX, minY, minZ, maxX, maxY, maxZ
-local centerToBaseDistance
+local minZ
 
 local hasRotation = {
 	object = true,
@@ -41,9 +39,9 @@ local function getElementRotation(element)
 	if elementType == "player" or elementType == "ped" then
 		return 0,0,getPedRotation(element)
 	elseif elementType == "object" then
-		return mta_getElementRotation(element)
+		return mta_getElementRotation(element, "ZYX")
 	elseif elementType == "vehicle" then
-		return mta_getElementRotation(element)
+		return mta_getElementRotation(element, "ZYX")
 	end
 end
 
@@ -76,8 +74,7 @@ local function rotateWithMouseWheel(key, keyState)
 			speed = speed * -1
 		end
 		if (getElementType(selectedElement) == "vehicle") or (getElementType(selectedElement) == "object") then
-			rotZ = rotZ + speed
-			setElementRotation(selectedElement, rotX, rotY, rotZ)
+			rotX, rotY, rotZ = exports.editor_main:applyIncrementalRotation(selectedElement, "yaw", speed)
 			--Peds dont have their rotation updated with their attached parents
 			for i,element in ipairs(getAttachedElements(selectedElement)) do
 				if getElementType(element) == "ped" then
@@ -177,7 +174,7 @@ local function onClientRender_freecam()
 			setElementPosition(selectedElement, targetX, targetY, targetZ)
 		end
 
-		rotX, rotY, rotZ = getElementRotation(selectedElement)
+		rotX, rotY, rotZ = getElementRotation(selectedElement, "ZYX")
 	end
 end
 
@@ -190,29 +187,29 @@ function attachElement(element)
 		if getResourceFromName"edf" and exports.edf:edfGetParent(element) ~= element then
 			if (getElementType(element) == "object") then
 				rotationless = false
-				rotX, rotY, rotZ = getElementRotation(element)
+				rotX, rotY, rotZ = getElementRotation(element, "ZYX")
 				collisionless = false
-				minX, minY, minZ, maxX, maxY, maxZ = exports.edf:edfGetElementBoundingBox(element)
+				_, _, minZ = exports.edf:edfGetElementBoundingBox(element)
 				centerToBaseDistance = exports.edf:edfGetElementDistanceToBase(element)
 			end
 		else
 			if (getElementType(element) == "vehicle") then
 				rotationless = false
-				rotX, rotY, rotZ = getElementRotation(element)
+				rotX, rotY, rotZ = getElementRotation(element, "ZYX")
 				collisionless = false
-				minX, minY, minZ, maxX, maxY, maxZ = getElementBoundingBox(element)
+				_, _, minZ = getElementBoundingBox(element)
 				centerToBaseDistance = getElementDistanceFromCentreOfMassToBaseOfModel(element)
 			elseif (getElementType(element) == "object") then
 				rotationless = false
-				rotX, rotY, rotZ = getElementRotation(element)
+				rotX, rotY, rotZ = getElementRotation(element, "ZYX")
 				collisionless = false
-				minX, minY, minZ, maxX, maxY, maxZ = getElementBoundingBox(element)
+				_, _, minZ = getElementBoundingBox(element)
 				centerToBaseDistance = getElementDistanceFromCentreOfMassToBaseOfModel(element)
 			elseif (getElementType(element) == "ped") then
 				rotationless = false
 				rotX, rotY, rotZ = 0, 0, getPedRotation(element)
 				collisionless = false
-				minX, minY, minZ, maxX, maxY, maxZ = getElementBoundingBox(element)
+				_, _, minZ = getElementBoundingBox(element)
 				centerToBaseDistance = getElementDistanceFromCentreOfMassToBaseOfModel(element)
 			else
 				rotationless = true
@@ -242,13 +239,12 @@ function detachElement()
 
 		-- clear variables
 		camX, camY, camZ = nil, nil, nil
-		camRX, camRY, camRZ = nil, nil, nil
 		if (not rotationless) then
 			rotX, rotY, rotZ = nil, nil, nil
 		end
 		rotationless = nil
 		if (not collisionless) then
-			minX, minY, minZ, maxX, maxY, maxZ = nil, nil, nil, nil, nil, nil
+			minZ = nil
 			centerToBaseDistance = nil
 		end
 		collisionless = nil

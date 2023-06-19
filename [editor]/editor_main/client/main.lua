@@ -151,6 +151,7 @@ function startWhenLoaded()
 	end
 	if isInterfaceLoaded() then
 		removeEventHandler("onClientResourceStart", root, startWhenLoaded)
+		loadRotationFixXML()
 		startEditor()
 	end
 end
@@ -193,7 +194,7 @@ addEventHandler("onClientRender", root,
 			return
 		end
 		if g_dragElement and not g_selectedElement then
-			local camX, camY, camZ, lookX, lookY, lookZ = getCameraMatrix()
+			local camX2, camY2, camZ2, lookX, lookY, lookZ = getCameraMatrix()
 			local distance = math.sqrt((g_dragPosition.x - lookX)^2 +
 									   (g_dragPosition.y - lookY)^2 +
 				 (g_dragPosition.z and (g_dragPosition.z - lookZ)^2 or 0))
@@ -211,8 +212,8 @@ addEventHandler("onClientRender", root,
 				g_targetedElement = edf.edfGetAncestor(targetElement)
 			end
 
-			local camX, camY, camZ = getCameraMatrix()
-			local distance = math.sqrt( (targetX - camX)^2 + (targetY - camY)^2 + (targetZ - camZ)^2 )
+			local camX2, camY2, camZ2 = getCameraMatrix()
+			local distance = math.sqrt( (targetX - camX2)^2 + (targetY - camY2)^2 + (targetZ - camZ2)^2 )
 			local roundedDistance = string.format("%." .. (DISTANCE_DECIMAL_PLACES) .. "f", distance)
 			createHighlighterText ( labelCenterX,labelCenterY,
 							getElementID(g_targetedElement) or "",
@@ -233,8 +234,8 @@ addEventHandler("onClientRender", root,
             local line2 = ""
             local line3 = ""
 			if not targetElement and buildingInfo then
-				local camX, camY, camZ = getCameraMatrix()
-				local distance = math.sqrt( (targetX - camX)^2 + (targetY - camY)^2 + (targetZ - camZ)^2 )
+				local camX2, camY2, camZ2 = getCameraMatrix()
+				local distance = math.sqrt( (targetX - camX2)^2 + (targetY - camY2)^2 + (targetZ - camZ2)^2 )
 				local roundedDistance = string.format("%." .. (DISTANCE_DECIMAL_PLACES) .. "f", distance)
 				local modelName = tostring( engineGetModelNameFromID( buildingInfo.id ) )
 				if ( buildingInfo.LODid ~= nil ) then
@@ -730,7 +731,7 @@ function disableGameHUD()
 end
 
 -- PUBLIC
-function selectElement(element, submode, shortcut, dropreleaseLock, dropclonedrop)
+function selectElement(element, submode, shortcut, dropreleaseLock, dropclonedrop, ignoreProperties)
 	local openProperties
 	submode = submode or g_submode
 
@@ -802,8 +803,10 @@ function selectElement(element, submode, shortcut, dropreleaseLock, dropclonedro
 			createArrowMarker(handle)
 		end
 	else
-		editor_gui.openPropertiesBox( element, false, shortcut )
-		openProperties = true
+		if not ignoreProperties then
+			editor_gui.openPropertiesBox( element, false, shortcut )
+			openProperties = true
+		end
 	end
 
 	triggerServerEvent("doLockElement", element)
@@ -875,6 +878,9 @@ function dropElement(releaseLock,clonedrop)
 
 	-- trigger server selection events
 	triggerServerEvent("onElementDrop", g_selectedElement)
+	
+	-- Clear rotation as it can be rotated by other players
+	clearElementQuat(g_selectedElement)
 
 	local droppedElement = g_selectedElement
 	g_selectedElement = false
@@ -954,7 +960,7 @@ end
 
 -- sets the maximum distance at which an element can be selected
 function setMaxSelectDistance(distance)
-	assert((distance >= 0), "Distance must be a positive number")
+	assert((distance >= 0), "Distance must be a positive number.")
 	g_maxSelectDistance = distance
 	return true
 end
@@ -975,7 +981,10 @@ function getMaxSelectDistance()
 	return g_maxSelectDistance
 end
 
-function destroySelectedElement()
+function destroySelectedElement(key)
+	if key then
+		editor_gui.restoreSelectedElement()
+	end
 	if g_selectedElement then
 		local element = g_selectedElement
 		dropElement(false)
@@ -1246,7 +1255,7 @@ end
 function updateArrowMarker( element )
 	if not g_arrowMarker then return end
 
-	local element = element or g_selectedElement
+	element = element or g_selectedElement
 	if not element then return end
 
 	local radius = edf.edfGetElementRadius(element) or 1
@@ -1276,8 +1285,10 @@ function setMovementType( movementType )
 	if g_arrowMarker then
 		if movementType == "move" then
 			setMarkerColor(g_arrowMarker, 255, 255, 0)
-		elseif movementType == "rotate" then
+		elseif movementType == "rotate" or movementType == "rotate_world" then
 			setMarkerColor(g_arrowMarker, 0, 255, 0)
+		elseif movementType == "rotate_local" then
+			setMarkerColor(g_arrowMarker, 0, 255, 255)
 		end
 	end
 end

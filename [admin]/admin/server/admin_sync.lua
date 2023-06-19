@@ -64,13 +64,13 @@ function aSynchCoroutineFunc( type, data, typeOfTag, banSearchTag )
 		for id, resource in ipairs(resourceTable) do
 			local name = getResourceName ( resource )
 			local state = getResourceState ( resource )
-			local type = getResourceInfo ( resource, "type" )
+			local type2 = getResourceInfo ( resource, "type" )
 			local _,numsettings = aGetResourceSettings(name,true)
 			tableOut[id] = {}
 			tableOut[id]["name"] = name
 			tableOut[id]["numsettings"] = numsettings
 			tableOut[id]["state"] = state
-			tableOut[id]["type"] = type
+			tableOut[id]["type"] = type2
 			tableOut[id]["fullName"] = getResourceInfo(resource, "name") or "Unknown"
 			tableOut[id]["author"] = getResourceInfo(resource, "author") or "Unknown"
 			tableOut[id]["version"] = getResourceInfo(resource, "version") or "Unknown"
@@ -191,12 +191,11 @@ function aSynchCoroutineFunc( type, data, typeOfTag, banSearchTag )
 				if getNeededTagType (data[1],ban) and string.match (string.lower(tType),string.lower(data[2])) then
 					if (isElement(source)) then -- In case the source has quit during coroutine loading
 						if cnt <= maxBanCount then
-						cnt = cnt + 1
-						triggerClientEvent ( source, "aClientSync", theSource, type, tableOut,data )
+							cnt = cnt + 1
+							triggerClientEvent ( source, "aClientSync", theSource, type, tableOut,data )
 						else
-						triggerClientEvent ( source, "aClientSync", theSource, "message", false,{"error","Be more specific in your search query! (keyword returns more than 100 matches) search not completed due to server load, it's limited to displaying the first 100 results now."} )
-						cnt = nil
-						return
+							triggerClientEvent ( source, "aClientSync", theSource, "message", false,{"error","Be more specific in your search query! (keyword returns more than 100 matches) search not completed due to server load, it's limited to displaying the first 100 results now."} )
+							return
 						end
 					end
 				end

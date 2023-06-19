@@ -405,7 +405,7 @@ function edfRepresentElement(theElement, resource, parentData, editorMode, restr
 	end
 
 	-- check all defined fields for validity and stores them in a parent data table
-	local parentData = parentData or {}
+	parentData = parentData or {}
 	for dataField, dataDefinition in pairs(elementDefinition.data) do
 		local checkedData = edfCheckElementData(theElement, dataField, dataDefinition)
 		if checkedData == nil then
@@ -531,9 +531,6 @@ function edfRepresentElement(theElement, resource, parentData, editorMode, restr
 								string.sub(dataValue, -1) == '!'
 							then
 								inherited[string.sub(dataValue,2,-2)] = true
-								-- get it from the parent data table
-								local parentDataField = string.sub(dataValue,2,-2)
-								dataValue = parentData[parentDataField]
 							end
 							subParentData[dataField] = dataField
 						end
@@ -621,7 +618,7 @@ function edfCreateElement(elementType, creatorClient, fromResource, parametersTa
 			if dataField == "position" then
 				edfSetElementPosition(newElement, dataValue[1], dataValue[2], dataValue[3])
 			elseif dataField == "rotation" then
-				edfSetElementRotation(newElement, dataValue[1], dataValue[2], dataValue[3])
+				edfSetElementRotation(newElement, dataValue[1], dataValue[2], dataValue[3], dataValue[4])
 			elseif dataField == "interior" then
 				setElementInterior(newElement, math.max(dataValue, 0))
 				setElementData(newElement, dataField, math.max(dataValue, 0))
@@ -674,14 +671,11 @@ function edfCloneElement(theElement, editorMode )
 	parametersTable.alpha = edfGetElementAlpha(theElement) or 255
 
 	if isBasic[elementType] then
-		local childData = {}
 		for property, propertyData in pairs(edf[creatorResource]["elements"][elementType].data) do
 			--try to get the given value in target datatype
 			if convert[propertyData.datatype] then
 				parametersTable[property] = convert[propertyData.datatype](parametersTable[property])
 			end
-			--store the value, or its default
-			childData[property] = parametersTable[property] or propertyData.default
 		end
 
 		local oldElement = theElement
@@ -905,25 +899,24 @@ function edfSetElementPosition(element, px, py, pz)
 end
 
 --Sets an element's rotation, or its rotX/Y/Z element data
-function edfSetElementRotation(element, rx, ry, rz)
+function edfSetElementRotation(element, rx, ry, rz, rotOrder)
 	local ancestor = edfGetAncestor(element) or element
-	setElementData(ancestor, "rotation", {rx, ry, rz})
-
+	setElementData(ancestor, "rotation", {rx, ry, rz, rotOrder})
 	local etype = getElementType(element)
 	if etype == "object" or etype == "vehicle" then
-		if rx and ry and rz and setElementRotation(element, rx, ry, rz) then
+		if rx and ry and rz and setElementRotation(element, rx, ry, rz, rotOrder) then
 			triggerEvent ( "onElementPropertyChanged", ancestor, "rotation" )
 			return true
 		end
 	elseif etype == "player" or etype == "ped" then
-		if setElementRotation(element, 0, 0, rz) then
+		if setElementRotation(element, 0, 0, rz, rotOrder) then
 			triggerEvent ( "onElementPropertyChanged", ancestor, "rotation" )
 			return true
 		end
 	else
 		local handle = edfGetHandle(element)
 		if handle then
-			if setElementRotation(handle, rx, ry, rz) then
+			if setElementRotation(handle, rx, ry, rz, rotOrder) then
 				triggerEvent ( "onElementPropertyChanged", ancestor, "rotation" )
 				return true
 			end

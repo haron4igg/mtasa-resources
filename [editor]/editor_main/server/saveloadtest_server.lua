@@ -321,7 +321,6 @@ local specialSyncers = {
 }
 
 function saveResourceCoroutineFunction ( resourceName, test, theSaver, client, gamemodeName )
-	local tick = getTickCount()
 	local iniTick = getTickCount()
 	if ( loadedMap ) then
 		if ( string.lower(loadedMap) == string.lower(resourceName) ) then
@@ -440,14 +439,14 @@ function saveResourceCoroutineFunction ( resourceName, test, theSaver, client, g
 	end
 	-- Save in the map node the used definitions
 	local usedDefinitions = ""
-	for resource in pairs(usedResources) do
-		usedDefinitions = usedDefinitions .. resource .. ","
+	for resource2 in pairs(usedResources) do
+		usedDefinitions = usedDefinitions .. resource2 .. ","
 	end
 	if usedDefinitions ~= "" then
 		usedDefinitions = string.sub(usedDefinitions, 1, #usedDefinitions - 1)
 		xmlNodeSetAttribute(xmlNode, "edf:definitions", usedDefinitions)
 	end
-	local tick = getTickCount()
+	tick = getTickCount()
 
 	for i, element in ipairs(rootElements) do
 		if (getTickCount() > tick + 200) or ( DEBUG_LOADSAVE and i < 40 ) then
@@ -600,8 +599,8 @@ function doQuickSaveCoroutineFunction(saveAs, dump, client)
 		end
 		-- Save in the map node the used definitions
 		local usedDefinitions = ""
-		for resource in pairs(usedResources) do
-			usedDefinitions = usedDefinitions .. resource .. ","
+		for resource2 in pairs(usedResources) do
+			usedDefinitions = usedDefinitions .. resource2 .. ","
 		end
 		if ( usedDefinitions ~= "" ) then
 			usedDefinitions = string.sub(usedDefinitions, 1, #usedDefinitions - 1)
@@ -691,6 +690,9 @@ function createElementAttributesForSaving(xmlNode, element)
 			xmlNodeSetAttribute(elementNode, "posZ", toAttribute(round(dataValue[3], 5)))
 			posSetX, posSetY, posSetZ = true, true, true
 		elseif ( dataName == "rotation" ) then
+			if dataValue[4] == "ZYX" then
+				euler_ZYX_to_ZXY(dataValue)
+			end
 			xmlNodeSetAttribute(elementNode, "rotX", toAttribute(round(dataValue[1], 3)))
 			xmlNodeSetAttribute(elementNode, "rotY", toAttribute(round(dataValue[2], 3)))
 			xmlNodeSetAttribute(elementNode, "rotZ", toAttribute(round(dataValue[3], 3)))
@@ -774,7 +776,7 @@ function beginTest(client,gamemodeName)
 		if getResourceState(freeroamRes) ~= "running" and not startResource ( freeroamRes, true ) then
 			restoreSettings()
 			triggerClientEvent ( root, "saveloadtest_return", client, "test", false, false,
-			"'editor_main' may lack sufficient ACL previlages to start/stop resources! (1)" )
+			"'editor_main' may lack sufficient ACL privileges to start/stop resources! (1)" )
 			return false
 		end
 		local gamemode = getResourceFromName(gamemodeName)
@@ -786,14 +788,14 @@ function beginTest(client,gamemodeName)
 				g_restoreEDF = nil
 				removeEventHandler ( "onResourceStop", getResourceRootElement(gamemode), startGamemodeOnStop )
 				triggerClientEvent ( root, "saveloadtest_return", client, "test", false, false,
-				"'editor_main' may lack sufficient ACL previlages to start/stop resources! (2)" )
+				"'editor_main' may lack sufficient ACL privileges to start/stop resources! (2)" )
 				return false
 			end
 		else
 			if not mapmanager.changeGamemode(gamemode,testMap) then
 				restoreSettings()
 				triggerClientEvent ( root, "saveloadtest_return", client, "test", false, false,
-				"'editor_main' may lack sufficient ACL previlages to start/stop resources! (3)" )
+				"'editor_main' may lack sufficient ACL privileges to start/stop resources! (3)" )
 				return false
 			end
 		end
@@ -802,12 +804,12 @@ function beginTest(client,gamemodeName)
 		if getResourceState(freeroamRes) ~= "running" and not startResource ( freeroamRes, true ) then
 			restoreSettings()
 			triggerClientEvent ( root, "saveloadtest_return", client, "test", false, false,
-			"'editor_main' may lack sufficient ACL previlages to start/stop resources! (4)" )
+			"'editor_main' may lack sufficient ACL privileges to start/stop resources! (4)" )
 			return false
 		end
 		if getResourceState(testMap) ~= "running" and not startResource ( testMap, true ) then
 			triggerClientEvent ( root, "saveloadtest_return", client, "test", false, false,
-			"'editor_main' may lack sufficient ACL previlages to start/stop resources! (5)" )
+			"'editor_main' may lack sufficient ACL privileges to start/stop resources! (5)" )
 			return false
 		end
 		g_in_test = "map"

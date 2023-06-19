@@ -854,7 +854,7 @@ template.viewcontents = {
 
                             local function func ( )
                                 if deleteClientHandling ( pVehicle, name ) then
-                                    guiCreateWarningMessage ( getText ( "sucessDelete" ), 3 )
+                                    guiCreateWarningMessage ( getText ( "successDelete" ), 3 )
                                 end
                             end
 
@@ -911,9 +911,6 @@ template.viewcontents = {
                     type = "checkbox",
                     pos = { 148, 83 },
                     size = { 34, 15 },
-                    runfunction = function ( this )
-                        guiSetEnabled ( this, false )
-                    end,
                     events = {
                         onClick = function ( this )
                             for k,v in pairs ( heditGUI.viewItems.import.guiItems.methods ) do

@@ -23,7 +23,7 @@ local rotationless
 local rotX, rotY, rotZ
 
 local collisionless
-local minX, minY, minZ, maxX, maxY, maxZ
+local minZ
 
 local ignoreFirst
 
@@ -136,27 +136,6 @@ local function processCursorMove(absoluteX, absoluteY)
 	end
 end
 
-local function zoomWithMouseWheel(key, keyState)
-	if not getCommandState("mod_rotate") then
-		local speed
-		if (getCommandState("mod_slow_speed")) then
-			speed = zoomSpeed.slow
-		elseif (getCommandState("mod_fast_speed")) then
-			speed = zoomSpeed.fast
-		else
-			speed = zoomSpeed.medium
-		end
-
-		if getCommandState("zoom_in") then
-			maxMoveDistance = math.max(maxMoveDistance - speed, MIN_DISTANCE)
-			processCursorMove()
-		else --if key == "zoom_out"
-			maxMoveDistance = math.min(maxMoveDistance + speed, MAX_DISTANCE)
-			processCursorMove()
-		end
-	end
-end
-
 local function onClientCursorMove_cursor(_, _, absoluteX, absoluteY )
 	if (selectedElement) then
 		if ignoreFirst then
@@ -181,9 +160,10 @@ local function rotateWithMouseWheel(key, keyState)
 		if (key == "quick_rotate_decrease") then
 			speed = speed * -1
 		end
-		if (getElementType(selectedElement) == "vehicle") or (getElementType(selectedElement) == "object") then
-			rotZ = rotZ + speed
-			setElementRotation(selectedElement, rotX, rotY, rotZ)
+		
+		local elementType = getElementType(selectedElement)
+		if (elementType == "vehicle") or (elementType == "object") then
+			rotX, rotY, rotZ = exports.editor_main:applyIncrementalRotation(selectedElement, "yaw", speed)
 			--Peds dont have their rotation updated with their attached parents
 			for i,element in ipairs(getAttachedElements(selectedElement)) do
 				if getElementType(element) == "ped" then
@@ -191,7 +171,7 @@ local function rotateWithMouseWheel(key, keyState)
 					setPedRotation(element, rotZ)
 				end
 			end
-		elseif (getElementType(selectedElement) == "ped") then
+		elseif (elementType == "ped") then
 			rotZ = rotZ + speed
 			rotZ = rotZ % 360
 			setPedRotation(selectedElement, rotZ)
@@ -240,19 +220,19 @@ function attachElement(element)
 			rotationless = false
 			rotX, rotY, rotZ = getElementRotation(element)
 			collisionless = false
-			minX, minY, minZ, maxX, maxY, maxZ = exports.edf:edfGetElementBoundingBox(element)
+			_, _, minZ = exports.edf:edfGetElementBoundingBox(element)
 		end
 	else
 		if (getElementType(element) == "vehicle") or (getElementType(element) == "object") then
 			rotationless = false
 			rotX, rotY, rotZ = getElementRotation(element)
 			collisionless = false
-			minX, minY, minZ, maxX, maxY, maxZ = getElementBoundingBox(element)
+			_, _, minZ = getElementBoundingBox(element)
 		elseif (getElementType(element) == "ped") then
 			rotationless = false
 			rotX, rotY, rotZ = 0, 0, getPedRotation(element)
 			collisionless = false
-			minX, minY, minZ, maxX, maxY, maxZ = getElementBoundingBox(element)
+			_, _, minZ = getElementBoundingBox(element)
 		else
 			rotationless = true
 			collisionless = true
@@ -276,7 +256,7 @@ function detachElement()
 	local tempPosX, tempPosY, tempPosZ = getElementPosition(selectedElement)
 	triggerServerEvent("syncProperty", localPlayer, "position", {tempPosX, tempPosY, tempPosZ}, exports.edf:edfGetAncestor(selectedElement))
 	if hasRotation[getElementType(selectedElement)] then
-		rotX, rotY, rotZ = getElementRotation(selectedElement)
+		rotX, rotY, rotZ = getElementRotation(selectedElement, "ZYX")
 		triggerServerEvent("syncProperty", localPlayer, "rotation", {rotX, rotY, rotZ}, exports.edf:edfGetAncestor(selectedElement))
 	end
 	selectedElement = nil
@@ -285,7 +265,7 @@ function detachElement()
 	camX, camY, camZ = nil, nil, nil
 	rotX, rotY, rotZ = nil, nil, nil
 	rotationless = nil
-	minX, minY, minZ, maxX, maxY, maxZ = nil, nil, nil, nil, nil, nil
+	minZ = nil
 	collisionless = nil
 
 	return true

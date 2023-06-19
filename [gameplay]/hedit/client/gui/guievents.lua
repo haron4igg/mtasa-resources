@@ -6,7 +6,9 @@ function onMove ( _, _, cX, cY )
     if not (pressedButton and scrollbar and tobool(getUserConfig("dragmeterEnabled"))) then return end
 
     if not scrollbar.thresholdReached then
-        if not( abs(scrollbar.clickX - cX) > SCROLLBAR_THRESHOLD )then return end
+        if abs(scrollbar.clickX - cX) <= SCROLLBAR_THRESHOLD then
+			return
+		end
         -- execute belowif outside threshold...
         scrollbar.thresholdReached = true
         showScrollbar = true
@@ -65,7 +67,7 @@ function onClick ( button, state )
     local parent = guiGetElementParent ( source )
     local event = guiGetElementEvents ( source )
     local info = guiGetElementInfo ( source )
-    local state = (state == "down") and true or false
+    state = (state == "down") and true or false
 
     if state and (button == "left") and (parent == "viewItem") and tobool(getUserConfig("dragmeterEnabled")) then
         local inputType = guiGetElementInputType ( source )
@@ -264,7 +266,8 @@ function onEnter ( )
 
         if inputType == "infolabel" then
 
-            local property,name,info = guiGetElementProperty ( source ),nil,nil
+			local name, info
+            local property, _, _ = guiGetElementProperty ( source ),nil,nil
 
             if isHandlingPropertyHexadecimal ( property ) then
                 local byte, value = elementInfo.byte, elementInfo.value
