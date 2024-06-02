@@ -611,7 +611,13 @@ function aAction ( type, action, admin, player, data, more )
             if ( node["all"] ) then outputChatBox ( aStripString ( node["all"] ), root, r, g, b ) end
             if ( node["admin"] ) and ( admin ~= player ) then outputChatBox ( aStripString ( node["admin"] ), admin, r, g, b ) end
             if ( node["player"] ) then outputChatBox ( aStripString ( node["player"] ), player, r, g, b ) end
-            if ( node["log"] ) then outputServerLog ( aStripString ( node["log"] ) ) end
+            if ( node["log"] ) then
+				if exports["logger"] then
+                    exports["logger"]:logEvent(3, getResourceName(resource), nil, {player, "admin", by=getAccountName(getPlayerAccount(admin)), }, aStripString(node["log"]))
+                else
+                    outputServerLog(aStripString(node["log"]))
+                end
+            end
         end
     end
 end

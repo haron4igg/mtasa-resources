@@ -10,11 +10,11 @@
 
 _aclrights = {}
 
-function hasPermissionTo ( object )
-	if ( _aclrights[object] ) then
-		return true
-	end
-	return false
+function hasPermissionTo(object, default)
+    if (_aclrights[object]) then
+        return true
+    end
+    return default or false
 end
 
 addEvent ( "aPermissions", true )

@@ -22,12 +22,19 @@ function aSpectate ( player )
 	end
 
 	aSpectator.Spectating = player
+	setElementData(localPlayer, "aSpectating", player, false)
     setElementFrozen ( localPlayer, true )
     setElementInterior( localPlayer, getElementInterior( player ) )
     setElementDimension( localPlayer, getElementDimension( player ) )
 	if ( ( not aSpectator.Actions ) or ( not guiGetVisible ( aSpectator.Actions ) ) ) then
 		aSpectator.Initialize ()
 	end
+
+	local location = ("{%d %d %d}"):format(getElementPosition(player))
+    local locationFrom = ("{%d %d %d}"):format(getElementPosition(getLocalPlayer()))
+	if exports["logger"] then
+        exports["logger"]:logEvent(3, getResourceName(resource), nil, {localPlayer, "admin"}, "spectate=%s at=%s from=%s", player, location, locationFrom)
+    end
 end
 
 function aSpectator.Initialize ()
@@ -139,6 +146,7 @@ function aSpectator.Close ( destroy )
         setElementVelocity (localPlayer, 0, 0, 0)
         setElementFrozen ( localPlayer, false )
         aSpectator.Spectating = nil
+        setElementData(localPlayer, "aSpectating", false, false)
         showCursor ( true )
         aAdminMenu()
         aSpectator.Dimension = nil
@@ -301,7 +309,7 @@ function aSpectator.CheckCollision(x, y, z)
 			end
 		end
 	end
-	
+
 	return nearest_distance or false
 end
 

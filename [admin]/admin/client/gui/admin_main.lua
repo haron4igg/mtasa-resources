@@ -459,7 +459,7 @@ function aAdminMenuClose ( destroy )
 		guiSetVisible ( aAdminForm, false )
 	end
 	showCursor ( false )
-    guiSetInputMode ( "allow_binds")
+    guiSetInputMode ( "no_binds_when_editing")
 end
 
 function aMainSaveSettings ()

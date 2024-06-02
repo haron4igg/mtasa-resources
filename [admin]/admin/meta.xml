@@ -1,6 +1,7 @@
 <meta>
   <info author="lil_Toady" type="misc" version="1.6.0" />
   <min_mta_version client="1.5.9-9.20957.0" server="1.5.9-9.20957.0"/>
+  <download_priority_group>21</download_priority_group>
   <!--
     Admin System Meta File.
 
@@ -45,10 +46,11 @@
   <script src="client/gui/admin_settings.lua" type="client" cache="false" />
   <script src="client/gui/admin_screenshot.lua" type="client" cache="false" />
   <script src="client/colorpicker/colorpicker.lua" type="client" cache="false" />
-
+  
   <!-- Placeholder for backwards compatibility -->
   <script src="server/admin_ip2c.lua" />
   <export function="getPlayerCountry"/>
+  <export function="hasPermissionTo" type="client"/>
 
   <!--Required XML configs kept in /conf/ folder-->
   <config src="conf/interiors.xml" type="client" />
@@ -107,74 +109,74 @@
   -->
 
  <settings>
-		<!-- *****************************************************
-			 All these settings are adjustable in the Admin Panel:
-				1. start admin
-				2. press 'p'
-				3. select Resources tab
-				4. double click on the resource name
-			 ***************************************************** -->
+    <!-- *****************************************************
+       All these settings are adjustable in the Admin Panel:
+        1. start admin
+        2. press 'p'
+        3. select Resources tab
+        4. double click on the resource name
+       ***************************************************** -->
 
-		<setting name="*maxmsgs" value="55"
-					friendlyname="Max messages"
-					accept="1-1000"
-					desc="Maximum admin messages to keep."
-					/>
+    <setting name="*maxmsgs" value="55"
+          friendlyname="Max messages"
+          accept="1-1000"
+          desc="Maximum admin messages to keep."
+          />
 
-		<setting name="*bandurations" value="3600,43200,86400,172800,604800,0"
-					friendlyname="Ban durations"
-					group="Durations"
-					examples="3600,43200,0"
-					desc="Duration options for the ban window. Comma seperated list in seconds. 0 means no duration limit."
-					/>
+    <setting name="*bandurations" value="3600,43200,86400,172800,604800,0"
+          friendlyname="Ban durations"
+          group="Durations"
+          examples="3600,43200,0"
+          desc="Duration options for the ban window. Comma seperated list in seconds. 0 means no duration limit."
+          />
 
-		<setting name="*mutedurations" value="60,300,3600,43200,86400,172800,0"
-					friendlyname="Mute durations"
-					group="Durations"
-					examples="60,300,0"
-					desc="Duration options for the mute window. Comma seperated list in seconds. 0 means no duration limit."
-					/>
+    <setting name="*mutedurations" value="60,300,3600,43200,86400,172800,0"
+          friendlyname="Mute durations"
+          group="Durations"
+          examples="60,300,0"
+          desc="Duration options for the mute window. Comma seperated list in seconds. 0 means no duration limit."
+          />
 
-		<setting name="*securitylevel" value="2"
-					friendlyname="Security level"
-					group="_Advanced"
-					accept="0-2"
-					desc="Detect fake admin packets. 0-No checks  1-Some checks  2-All checks."
-					/>
+    <setting name="*securitylevel" value="2"
+          friendlyname="Security level"
+          group="_Advanced"
+          accept="0-2"
+          desc="Detect fake admin packets. 0-No checks  1-Some checks  2-All checks."
+          />
 
-		<setting name="*clientcheckban" value="false"
-					friendlyname="clientcheckban"
-					group="_Advanced"
-					accept="true,false"
-					desc="Ban IP's that attempt to send fake admin packets."
-					/>
+    <setting name="*clientcheckban" value="false"
+          friendlyname="clientcheckban"
+          group="_Advanced"
+          accept="true,false"
+          desc="Ban IP's that attempt to send fake admin packets."
+          />
       
-		<setting name="*useip2c" value="true"
-					friendlyname="useip2c"
-					group="_Advanced"
-					accept="true,false"
-					desc="When enabled, admin will use the ip2c resource to determine players' countries by their IP."
-					/>
+    <setting name="*useip2c" value="true"
+          friendlyname="useip2c"
+          group="_Advanced"
+          accept="true,false"
+          desc="When enabled, admin will use the ip2c resource to determine players' countries by their IP."
+          />
 
-		<setting name="*maxchatmsgs" value="10"
-					friendlyname="Max chat log messages"
-					accept="1-1000"
-					desc="Maximum chat log messages per player to store. Decreasing this value may save some of server RAM."
-					/>
+    <setting name="*maxchatmsgs" value="10"
+          friendlyname="Max chat log messages"
+          accept="1-1000"
+          desc="Maximum chat log messages per player to store. Decreasing this value may save some of server RAM."
+          />
 
-		<setting name="*reportCategories" value="Question,Suggestion,Other"
-					friendlyname="Report categories"
-					desc="List of non player report categories."
-					/>
+    <setting name="*reportCategories" value="Question,Suggestion,Other"
+          friendlyname="Report categories"
+          desc="List of non player report categories."
+          />
 
-		<setting name="*playerReportCategories" value="Rulebreaks,Cheater/Modder,Spammer"
-					friendlyname="Player report categories"
-					desc="List of report categories for reporting players."
-					/>
-	     	<setting name="*adminChatCommandName" value="a"
-          				friendlyname="Admin chat command name"
-          				desc="The command name for admin chat."
-          				/>
+    <setting name="*playerReportCategories" value="Rulebreaks,Cheater/Modder,Spammer"
+          friendlyname="Player report categories"
+          desc="List of report categories for reporting players."
+          />
+    <setting name="*adminChatCommandName" value="a"
+              friendlyname="Admin chat command name"
+              desc="The command name for admin chat."
+              />
 
  </settings>
 </meta>
